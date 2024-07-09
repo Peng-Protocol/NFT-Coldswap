@@ -1,0 +1,67 @@
+/// Premise ///
+A simple router between NFT Hotswap and Quickswap DEX.
+
+/// Contracts ///
+The system consists of one contract; the router. 
+
+/// Router v1 /// 
+The router executes transactions to buy or sell a token on Quickswap and NFT Hotswap sequentially. 
+
+! Functions ! 
+- sellQuick; 
+Executes a transaction to sell an NFT on NFT Hotswap for its listed FFT (float enabled fungible token), then within the same transaction swaps the listed FFT for a target token on quickswap or for [NATIVE]. 
+
+NFT(hotswap) >> FFT(hotswap) >> FFT/NATIVE(QuickSwap). 
+
+Required fields; startController, endToken.
+
+"startController" defines where to call 'swapNFT' in order to sell the intended NFT. 
+
+"endToken" defines what kind of swap to execute on QuickSwap and what token address to specify for purchase. (Needs to estimate minimum output and maximum input based on the current price of the token. Specifying "0x00" initiates a [NATIVE] swap). 
+
+
+  
+- buyQuick; 
+Executes a transaction to convert a user's FFT or [NATIVE] on QuickSwap for a target token listed on NFT Hotswap, then within the same transaction swaps the listed FFT for the target NFT. 
+
+FFT(QuickSwap) >> FFT(hotswap) >> NFT(hotswap).
+
+Required fields; startToken, endController. 
+
+"startToken" defines what kind of swap to execute on QuickSwap and what token address to specify for sale. (Needs to estimate minimum output and maximum input based on the current price of the token. Specifying "0x00" initiates a [NATIVE] swap). 
+
+"endController" defines where to call 'swapFFT' in order to buy the intended NFT. 
+
+- setQuickSwap
+Determines the QuickSwap router where swap functions are called. 
+
+/// Router v2 /// 
+Adds functions for three-way swaps with Coldswap fractionalized tokens. Only useable once Coldswap is live.
+
+! Added Functions !
+- freezeAndSwap; 
+Executes a transaction to convert a listed NFT for its Cold token, then swaps the cold token on QuickSwap for a target token. 
+
+NFT(hotswap) >> Cold-Token(coldswap) >> FFT(QuickSwap)
+
+! Required Fields !
+
+startController, coldListing, endToken
+
+"coldListing" defines the coldswap listing address where 'marketBuy' is called. 
+
+
+
+- swapAndFreeze; 
+Executes a transaction to swap a target token on QuickSwap for a Cold Token, then converts the Cold Token for a listed NFT. 
+
+FFT(QuickSwap) >> Cold-Token(coldswap) >> NFT(hotswap) 
+
+! Required Fields ! 
+
+startToken, coldListing, endController 
+
+/// Notes ///
+- No preset data like smart contract addresses 
+
+- No constructor arguments
