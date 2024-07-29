@@ -126,8 +126,9 @@ Returns the address of the controller that created the listing.
 String data containing the name of the NFT collection in question, formatted as "Fractional [NAME]", 
                                                   
 /// Cold Tokens ///
-Each NFT once listed is given an associated "Cold Token" deployment, Cold Tokens are standard ERC-20 FFTs that can be swapped 1 to 1 for the listed NFT using 'marketBuy' and 'marketSell'. 
-The tokens have 8 decimals by default. 
+Each NFT once listed is given an associated "Cold Token" deployment, Cold Tokens are standard ERC-20 FFTs that can be swapped at a preset ratio for the listed NFT using 'marketBuy' and 'marketSell'.
+The ratio is set by the deployer as a unit256 number, this indicates how much of the cold token can be swapped for 1 NFT.  
+The tokens have 18 decimals by default. 
 When issuing a cold token the deployer sets the supply. 
 
 /// New Hotswap Factory ///
