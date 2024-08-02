@@ -131,9 +131,6 @@ The ratio is set by the deployer as a unit256 number, this indicates how much of
 The tokens have 18 decimals by default. 
 When issuing a cold token the deployer sets the supply. 
 
-/// New Hotswap Factory ///
-Same as the old factory except listings take a specific range of NFT items, e.g ; 1-100, 200-250, etc. These Hotswap controllers will not trade an item outside the listed range and do not affect existing controllers. All Hotswap v1 controllers remain useable. 
-
 /// Examples /// 
 E1 : Maker places a marketBuy order to buy 10 NFTs with 10 Cold Tokens, 0.005% of the order is; 0.005, thus their actual order is charged 10.005 Cold tokens and they receive their 10 NFT settlement. The 0.005 Cold tokens are sent to the collector while the 10 cost is added to the liquidity balance of the listing contract.  
 
