@@ -17,7 +17,7 @@ Lets the user automatically search for an NFT's Coldswap Listing or Hotswap cont
 1e : Search Button; 
 Initiates automatic interaction, begins by querying the factory addresses' read function "pairs", starting from "0" it looks up the controller address returned and queries the "NFT" public data, if the address in "NFT" matches the address set by the user "1c" then the frontend caches the controller address with that NFT address and continues querying at the factory until there are no more slots to query.
 
-Alternatively, if the user begins puts a controller or listing address in the address field, the frontend app will attempt to find the NFT address and proceed with the prior search operation. 
+Alternatively, the contract will check if the address inserted is a controller or listing address. 
 
 Once all controllers with the specified NFT address have be cached the frontend queries the same NFT address on the Coldswap factory using the read function "listings", caching them as well. Once all controllers and listing addresses are cached the frontend presents 2-3. 
 
