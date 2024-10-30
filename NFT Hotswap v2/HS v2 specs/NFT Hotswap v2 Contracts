@@ -1,0 +1,279 @@
+/// Premise /// 
+An NFT liquidity protocol using CFAMM and synthetic NFTs. 
+
+/// General ///
+The system is made up of (2) contracts; "Hotswap v2 Factory" and "Hotswap v2 Controller". 
+
+/// Hotswap v2 Factory ///
+The v2 factory is responsible for creating new v2 controllers with details set by the deployer. 
+
+! Functions ! 
+- deployHotswap 
+Creates a new v2 controller with the user's stated details. Requires NFT and FFT addresses, requires "synthSupply" number, 
+
+- setCollector (ownerOnly)
+Determines the address of the protocol fee collector, the deployer is set here by default but can be changed,
+
+- queryByAddress 
+All deployed NFT/FFT LPs are stored by index and can be queried.  This function returns all index numbers that store a particular NFT or FFT or controller address, 
+Requires "step", each step returns up to 100 index numbers, 
+
+- queryByIndex 
+Returns the NFT/FFT addresses and controller address for a given controller stored by index number,
+
+- withdraw (ownerOnly)
+Allows the caller to withdraw all [NATIVE] in the contract. 
+
+- transferOwnership 
+Contract is ownable, ownership can be transferred.
+
+! Data ! 
+- collector 
+Stores the address of the collector, Collector is set into each new v2 controller,
+
+- owner 
+Stores the address of the owner. 
+
+/// Hotswap v2 Controller ///
+Is responsible for initiating swaps of an FFT with synthetic equivalents of the underlying NFT. 
+
+! Functions ! 
+- swapFFT 
+Initiates a transfer of FFT units from the caller in exchange for a stated number of held synthetic NFT items at the "impact price", not nominal price, this is calculated as follows;  
+
+NFT swap amount * price = FFT input 
+FFT Liquidity + FFT input = FFT impact 
+synthsHeld - NFT swap amount = NFT impact 
+FFT impact / NFT impact = impact price 
+
+The "impact price" is the price at which the user is settled,
+
+Cost is calculated as; 
+
+Swap Amount * impact price = FFT input 
+
+The user states how many NFTs they are buying,
+
+Allows stating a "maxInput" which limits how much FFT the contract is allowed to take during the swap,
+The contract calculates the nearest whole number in NFT items the user can buy using the "maxInput" amount they provided and buys that number outright, omitting any extra FFT units from the Input, 
+The user is only charged for the NFTs they were settled, 
+Transaction fails and reverts if the "maxInput" cannot buy up to (1) NFT,
+
+calls "updatePrice", 
+
+Updates "liquidity" data by querying how much FFT the contract (self) has after the swap,
+
+Updates "synthsHeld", 
+
+Bills the user an additional 0.4% fee which is added to "fees", affects "maxInput", (this applies to redeemFFT as well),
+
+Bills the user an additional 0.1% fee which is sent to the "collector", affects "maxInput", (this applies to redeemFFT as well),
+
+All swaps and redemptions are limited to 50% of the available FFT or Synth Liquidity respectively, if the cost or settlement of a swap exceeds 50% of FFT Liquidity then 
+the swap/redemption amount is reduced to the maximum allowable number of NFTs for the LP at that time, 
+
+- swapNFT 
+Similar to "swapFFT" but bills synthetic NFT items from the user's balance, the synthetic NFTs are held by the controller once swapped, 
+
+User states a "minOutput" amount, this defines the minimum amount of FFT they expect to get out from their swap,
+If the output amount for the swap is lower than the user's minOutput then the swap fails and reverts
+
+Each sell uses "impact price", this is calculated as follows;  
+
+NFT swap amount * price = FFT output 
+FFT Liquidity - FFT output = FFT impact 
+synthsHeld  + NFT swap amount = NFT impact 
+FFT impact / NFT impact = impact price 
+
+The "impact price" is the price at which the user is settled,
+
+Settlement is calculated as; 
+
+Swap Amount * impact price = FFT output 
+
+Subtracts additional 0.4% fee from the settlement which is added to "fees", affects "minOutput", (this applies to redeemNFT as well),
+
+Subtracts additional 0.1% fee from the settlement which is sent to the "collector", affects "minOutput", (this applies to redeemNFT as well),
+ 
+- redeemFFT 
+Similar to "swapFFT" except the user gets settled in "real" NFT items from the listed NFT collection, 
+This is limited to how many "real" NFT items are in the contract,
+If the user's order exceeds the available "real" NFT items then they are instead billed for and settled with the existing number of "real" NFT items, 
+
+Updates "heldNFTs" data storage by querying how many NFTs the contract (self) owns,
+
+Uses "maxInput",
+
+calls "updatePrice",
+
+Uses impact price but has no "real" effect on price,
+
+Has fees,
+
+- redeemNFT 
+Similar to "swapNFT" except the user gets billed "real" NFT items from the listed NFT collection, 
+
+Uses "impact price",
+
+Uses "minOutput",
+
+Updates "heldNFTs",
+
+Uses impact price but has no "real" effect on price,
+
+Has fees, 
+
+- redeemSynth
+Converts a number of synthetic NFT items with random "real" NFT items,
+
+Uses a 1:1 rate,
+Has no effect on price, 
+
+Does not have fees, 
+
+- deposit
+Allows the user to deposit FFT units and receive a Liquidity slot entry [See : "Liquidity Slots"] 
+
+When "deposit" is called the contract gets the ratios for the liquidity slot using the following formula;
+
+FFT deposit / FFT impact amount = FFT ratio
+
+"impact amount" is how much FFT will be in the contract after the function executes, this is acquired by calculating; 
+
+FFT deposit + FFT Liquidity = FFT impact amount,
+
+- withdrawLiquidity 
+Allows the owner of a Liquidity slot to withdraw up to the exact amount of FFT they deposited, this is calculated as; 
+
+Current FFT Liquidity * FFT ratio = output amount
+
+If the "output amount" is greater than their initial deposit then they are paid their initial instead, 
+
+If the available liquidity is not sufficient to cover the entire withdrawal; the contract calculates a "compensation" as follows; 
+
+initial deposit - pending amount = deficit 
+deficit / price = compensation-x 
+
+"Compensation-x" is an amount of Synthetic NFTs minted, this increases the synth supply, 
+
+Compensation-x always rounds up to the nearest whole number, 
+
+- claimFees ;
+Claims fees on a target liquidity slot owned by the caller, uses the following formula; 
+
+tVolume - dVolume = cVolume 
+
+cVolume / tVolume = volume ratio 
+
+volume ratio * total fees  = fees accrued 
+
+FFT Alloc  / Total FFT Liquidity = Liquidity contribution 
+
+fees accrued * liquidity contribution = output amount
+
+- transferLiquidity 
+Changes the "depositor" of a liquidity slot to a stated address, can only be called by the current depositor, requires index number, 
+
+- updatePrice 
+Each v2 controller is created with a stated number of synth items, price is calculated as;
+
+liquidity / synthsHeld = price
+
+- queryLiquidByIndex 
+Returns the full details of a liquidity slot by its index number, 
+
+- queryLiquidByOwner 
+Returns the index numbers of liquidity slots an address owns, 
+
+- querySynthByAddress 
+Returns the index numbers of all Synths an address owns,
+
+- querySynthByIndex 
+Returns the owner address of a synth item by its index number, 
+
+- queryOwned 
+Returns how many synth NFT items an address owns,
+
+
+! Data !
+- collector 
+Stores the address of the collector, 
+
+- FFT 
+Stores the contract address of the listed FFT, 
+
+- NFT 
+Stores the contract address of the listed NFT, 
+
+- liquidity
+This stores how much FFT the contract owns, is increased by deposits and buys,
+Is reduced by sells and withdrawals,
+associated functions also update this data storage,
+
+- heldNFTs 
+Stores the current number of "real" NFT items that the contract owns,
+
+- price 
+Stores the current price, 
+
+- synthsHeld
+Stores how many synth NFT items the controller owns, 
+
+- synthSupply
+Stores the total number of synth items in existence,
+
+- synthName 
+Stores the Synth token's "name", which is the original token's name plus "(Hotswap)",
+
+- synthTicker 
+Stores the Synth token's "symbol", which is the original token's symbol, 
+
+- controllerName
+Stores the symbols of the NFT and FFT collections, is set during deployment. 
+
+/// Liquidity Slots ///
+Each controller has storages for liquidity, these manage allocations of [FFT] stored under 'yLiquid', users can add to this balance by using function 'deposit', 
+Each time a user deposits; their details get written to 'liquidity slots', each liquidity slot holds the following details;
+
+depositor : (address)
+FFT Ratio : (uint256)
+dVolume : (unit256)
+yAllocation : (uint256)
+claimed : (bool)
+index : (uint256)
+
+"FFT Ratio" stores how much of the pool's FFT balance the depositor is entitled to,
+
+"dVolume" stores the tVolume value at the time the deposit was made and is necessary for claiming fees,
+
+"Allocations" show how much was originally deposited by the address, this is necessary for calculating how much they are owed once they attempt to withdraw,
+
+The "claimed" field is used to indicate if a user has claimed their fees or not, once set to "true" they can no longer claim, they can only withdraw their liquidity,
+If a user does not claim before withdrawing, then their fees are forfeit,
+
+Additional liquidity data stored by the controller are; 
+
+Fees : (uint256)
+tVolume : (uint256)
+
+"Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees.
+ 
+"tVolume" indicates how much volume in FFT has been done by the listing contract, is updated after every buy/sell, 
+This amount is acquired by the following formula; 
+
+FFT amount swapped + current volume = new volume
+
+"tVolume" is also important to the function 'claimFees'. 
+
+Fees are deducted upon each transaction, altering the FFT payout or initial swap, 
+Diverting the deducted amount into the liquidity contract's "fees" balance. 
+
+/// Notes ///
+- No "bail" functions, ensure thorough testing and audits are performed,
+
+- Fees *must* be billed from the user, not the LP,
+
+- (Observation) v1 had serious issues with users losing liquidity when withdrawing, depending on the state of the LP and what kind of deposit they made,
+v2 NFT deposits are thus replaced with synths, 
+v2 FFT deposits may cause some disproportionate profits if the pool becomes very illiquid after a user's deposit, 
+The compensation always rounds up, meaning the user can never lose money per say. 
