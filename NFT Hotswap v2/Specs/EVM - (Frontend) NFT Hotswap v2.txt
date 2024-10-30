@@ -1,0 +1,279 @@
+/// Premise /// 
+A frontend application for interacting with Hotswap contracts. 
+
+/// Page 1 : Landing  ///
+
+1a : Connect Wallet Button; 
+When clicked, triggers the app to request a connection with a valid web3 wallet on the device, (does not redirect if the device has no wallet, simply fails), (cannot be updated, all required wallet connect files are stored on the app), (does not automatically connect, must be clicked).   
+
+1b : Logo; 
+DXH Logo.
+
+1c : Search/Control Panel; 
+Lets the user automatically search for an NFT - FFT or Controller. 
+
+1d : Address Bar
+If a controller is set here, then no additional querying occurs and 1e goes directly to page 2 with the controllers address set. 
+
+1e-1 : Search Button; 
+Initiates search, queries the factory addresses' read function "queryByAddress", and then "queryByIndex", then looking up "controllerName" in the returned controller address. 
+
+Displays in a pop-up all Controllers with a given NFT or FFT. Displaying the controllers' names which are clickable links. These links direct to Page 2 - 3 with the controller address set. 
+
+Each returned Controller displays the FFT Liquidity amount, requires querying Liquidity on the controller. 
+
+Also displays an entry with only an FFT's Ticker if an FFT address is inserted in 1c, this can be clicked to use the address in Page 2. 
+
+If an FFT or NFT is not listed then it cannot be traded in any capacity, returns error message "Token not listed". 
+
+If returned controllers from querying the factory exceed 99 see 1e-2
+
+Putting "0" in this section prepares a swap for [NATIVE] in page 2.
+
+Putting "1" returns a list of all listed controllers, querying the factory incrementally from 1 to 100 or until an index returns no data, 1e-2 applies here.  
+
+1e-2 : More Button ; 
+A button that says "more" which causes the frontend to perform the same query done in 1e-1 but with a higher "step". 
+
+1f : List Button ;
+Sends the user to Page 3 with no address set. 
+
+1g : Help Button; 
+Presents a popup that reads "NFT Hotswap is a system for instantly converting NFTs for fungible tokens and vice versa, use this search bar to look up various token contracts. Type "0" to interact using the native token (MATIC), or "1" to get a list of all listed tokens". 
+
+1g : GitHub Link, Telegram Link, Cold Factory link, Hot Factories link ;
+"Hot Factories Link" opens 2 urls for the 2 Hotswap Factories. 
+
+
+/// Page 2 : Swap Interface ///
+
+2a : Trade menu 
+
+2b : Token-A ticker 
+This displays the ticker for the NFT set in 1c. 
+Queries "name" on the set controller and picks the NFT part of the name.
+
+If the stated token in 1c is an FFT then this displays the FFT Ticker instead and prepares for a FFT >> NFT or FFT >> FFT swap. 
+
+2c-1 : Token-A Price 
+This displays the price for the NFT set in 1c, displays the price as "# [FFT Ticker]" e.g "2.6 WMATIC" 
+Queries "Price" - "decimals" and "name" on the set controller and picks the FFT part of the name. Normalizes price to decimals. 
+
+If the stated token in 1c is an FFT or [NATIVE] then this uses "Uniswap Chain Queries" [See : "Links"] to find LP addresses with [FFT] and [NATIVE], returns the token's price in [NATIVE] or [NATIVE] itself and displays it in this area. 
+
+For any token with price in [NATIVE] or wrapped [NATIVE], the frontend queries a Chainlink data feed for [NATIVE] / USD and presents a USD price. 
+
+2c-2 : Token-A Balance ;
+Queries the user's NFT or FFT balance and displays it here. 
+
+For NFTs this uses "tokenOfOwnerByIndex" and queries index numbers incrementally from "1" until it reaches an index that returns no data. The total number of NFT IDs returns is displayed here. 
+
+2d : Token-B Ticker / field; 
+If no token is set here the it acts similar to 1c and allows the user to search for various FFT or NFTs on the Hotswap factory. 
+
+Also allows that if the inserted contract is an FFT then the FFT is entered in this field instead, indicating that the swap is for NFT >> FFT or FFT >> FFT. 
+
+Frontend determines if a contract is an FFT based on the order of returned data from querying the factory, considers the controller with the most FFT Liquidity to be valid. 
+
+If an NFT or FFT is not listed then it cannot be traded in any capacity, returns error message "Token not listed".  
+
+2e : Token-B Price
+Same as 2c but for the token stated in 2d. 
+
+2f : Amount Field ;
+Allows the user to state a number of NFTs or amount of FFT to buy or sell. 
+
+2g : Buy/sell toggle ;
+Determines if the swap is for buy or sell.
+
+2h : Redemption toggle
+Has a subtle text saying "Redeem",
+Determines if 2m uses "swapFFT" / "swapNFT" or "redeemNFT" / "redeemFFT". 
+
+2i : Real NFTs 
+Displays the number of "Real" NFT items in the controller, queries "heldNFTs" on the controller only after 2d is set. Only applies to Hotswap related swaps. 
+
+2j : Real NFT help button 
+Presents a pop-up saying "redeeming for a "real" NFT is limited by how many "real" items are available in the controller". 
+
+2k : slippage field ; 
+determines how much is set in "minOutput" or "maxInput" in 2m, default is "2". 
+And or how much is put into the QuickSwap "minimum out" and and "maximum in". 
+
+
+2l-1 : Cost/settlement (Hotswap) display ;
+For FFT >> NFT or NFT >> FFT on Hotswap only, this area shows how much [FFT] the swap will cost or settle.
+ 
+For buys; cost is derived from impact price; 
+
+NFT swap amount * price = FFT input 
+FFT Liquidity + FFT input = FFT impact 
+NFT Liquidity - NFT swap amount = NFT impact 
+FFT impact / NFT impact = impact price 
+
+Then using impact price to determine settlement; 
+
+Swap amount * impact price = initial input 
+Initial input / 100 * slippage percent = added input 
+initial input + added input = cost
+ 
+
+For sells this is also gotten by first calculating impact price; 
+
+NFT swap amount * price = FFT output 
+FFT Liquidity - FFT output = FFT impact 
+NFT Liquidity + NFT swap amount = NFT impact 
+FFT impact / NFT impact = impact price 
+
+Then using impact price to determine settlement; 
+
+Swap amount * impact price = initial output 
+Initial output / 100 * slippage percent = lost output
+initial output - lost output = settlement 
+
+
+2l-2 : Cost/settlement (QuickSwap) Display ; 
+For NFT (HS) >> FFT (HS) >> FFT (QS) swaps on Hotswap and QuickSwap. 
+
+Uses 2f-1 for FFT (HS) pre-settlement before getting FFT (QS) final settlement. 
+Frontend queries FFT (QS) price to [NATIVE]. Consider "Uniswap Chain Queries" and "what is the quote function..." [See : "Links"]. Calculates an estimated settlement amount and displays it in this field. 
+
+2l-3 : Cost/settlement (QuickSwap) Display part 2 ; 
+For FFT (QS) >> FFT (HS) >> NFT (HS) swaps on Hotswap and QuickSwap 
+
+Consider "Uniswap Chain Queries" and "what is the quote function..." [See : "Links"]. Calculates a pre-settlement. 
+Uses 2f-1 with the pre-settlement amount to calculate a final settlement and presents it in this area. 
+
+2l-4 : Cost/settlement (QuickSwap) Display part 3 ; 
+For FFT (QS) >> FFT (QS) swaps on QuickSwap. 
+
+Consider "Uniswap Chain Queries" and "what is the quote function..." [See : "Links"].
+
+Calculates a settlement amount and presents it in this area. 
+ 
+2m : Swap button ;
+Uses the Hotswap router if the swap involves QuickSwap.  
+Sets startAmount - FFTPair - startToken / endToken - startController / endController - path. 
+Gets FFTPair contract address by querying "FFT" on the target controller. 
+
+Consider "Uniswap Chain Queries" and "Smart Order Router" to get 'Path' [See : "Links"].
+
+(Presents a popup to approve the NFT or FFT for trade if not already approved)
+Pushes a transaction to execute the swap with the stated details. 
+
+This segment is for Hotswap only swaps; 
+
+Slippage setting is determined for buys as; 
+
+NFT swap amount * price = FFT input
+FFT  Input / FFT Liquidity * 100 = impact percent 
+FFT input / 100 * (slippage + impact percent) = delta
+FFT input + delta =  maxInput 
+
+Slippage setting is determined for sells as; 
+
+NFT swap amount * price = FFT output
+NFT swap amount / NFT Liquidity * 100 = impact percent 
+FFT output / 100 * (slippage + impact percent) = delta
+FFT output - delta =  minOutput
+
+"slippage" is the number set in the slippage field on 2k.
+
+This uses 'swapFFT' or 'swapNFT' respectively unless stated otherwise in 2e, I which case 'redeemNFT' or 'redeemFTT' are used. 
+
+For swaps that involve QuickSwap, consult "Hotswap Routers.txt". Consider "Uniswap Chain Queries" and "Smart Order Router" to get 'Path' [See : "Links"].
+
+Each time a swap completes, the frontend presents a pop-up with a Polygonscan link to the transaction. 
+
+Updates 2l-1 - 2l-2 - 2l-3 - 2l-4 - 2c and 2e. 
+
+2n : Liquidity menu button ;
+Presents Page 4.
+
+2o : Listing Menu ; 
+Presents page 3.
+
+2p : Help Button ; 
+Presents a pop-up that reads; "Use this menu to swap between NFTs on Hotswap - convert an NFT for an FFT and vice versa or convert an FFT for another FFT on QuickSwap. 
+Insert the desired destination NFT or FFT in the second token field. "Slippage" is how much price change you are willing to tolerate during your swap, high slippage can lead to losses". 
+
+2q : close button ; 
+Closes page 2, returns to page 1.
+ 
+
+/// Page 3 : Listing Menu ///
+3a : Hotswap Listing menu
+
+3b : NFT Address 
+
+3c : FFT Address 
+
+3d : List Button ;
+Pushes transaction to list the addresses set in "NFT Address" and "FFT Address", sets "0.001" in the payable field. 
+
+3e : Help Button ; 
+Presents a pop-up that reads; "Use this menu to list new non-fungible and fungible token pairs or relist existing pairs". 
+
+3e : Exit Button ;
+Closes page 3, returns to page 1.
+
+/// Page 4 ///
+
+4a : Liquidity menu
+
+4b : Name 
+Displays the controller's name, this menu can only be used if the address set in 1c is an NFT controller. 
+
+4c : Amount field 
+
+4d : Deposit button ; 
+Displays a pop-up for the user to approve the FFT or NFT if enough is not approved for deposit, if already approved then it pushes a transaction for deposit using the details provided. 
+
+4e : Positions panel ; 
+Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays as 1.0e5. Shows the token ticker up to 4 letters, more than 4 is displayed as "XXXX...". lastly it displays the amount of fees collected and unclaimed, if claimed this returns "N/A".  
+
+Unclaimed fees are calculated by using the following formula from the hotswap contracts specifications; 
+
+tVolume - dVolume = cVolume 
+
+cVolume / tVolume = volume ratio 
+
+volume ratio * total fees  = fees accrued 
+
+FFT Alloc  / Total FFT Liquidity = Liquidity contribution 
+
+fees accrued * liquidity contribution = unclaimed fees 
+
+4f : Claim fees button ;
+Pushes a transaction to claim fees on a given liquidity position. 
+
+4g : transfer liquidity button ; 
+Creates a pop-up with an "address" field -  "transfer" button and "close" button.
+Pushes a transaction to transfer a given liquidity slot to a stated address. 
+
+4h : Withdraw button ;
+Pushes a transaction to withdraw the target liquidity position. 
+
+4i : Scroll bar
+
+4k : Help Button ;
+Presents a pop-up that reads; "Use this menu to add Liquidity to an NFT's controller" 
+
+4k : Close button ; 
+returns the user to the landing page.
+ 
+/// Links ///
+QuickSwap Router needs "paths" which help it determine what LPs to go through in order to arrive at a destination token, use the following links to assist in routing; 
+
+https://github.com/Uniswap/smart-order-router
+
+https://github.com/thanpolas/uniswap-chain-queries 
+
+https://ethereum.stackexchange.com/questions/143697/what-is-the-quote-function-in-uniswapv2library-used-for
+
+https://github.com/Aboudoc/Uniswap-v2
+
+/// Notes /// 
+- Querying all controller addresses could take a while if there are many, 'steps' help in avoiding unnecessarily large compute.  
+
+- Should have dark mode, use inverted version of background image. 
