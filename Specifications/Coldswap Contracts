@@ -2,7 +2,7 @@
 An NFT fractionalization system that allows trading an NFT collection for an equivalent FFT created by the exchange. Additionally allows individual sale or purchase of NFT items at bid/ask prices using [NATIVE]. 
 
 /// Contracts ///
-The system is split into (3) contracts; the Coldswap Controller, Cold Tokens and listing contracts.
+The system is split into (3) contracts; the Coldswap controller, Cold Tokens and listing contracts.
 
 /// Coldswap Controller ///
 The Coldswap controller is responsible for creating new listing contracts and executing orders. Liquidity is held in each respective listing contract. 
@@ -38,12 +38,11 @@ Sets the collector address.
 - collector
 Each 'marketBuy' and 'bidBuy', takes a 0.05% fee from the maker which is added to their cost, while each 'marketSell' and 'askSell' takes a 0.05% fee from the taker which is deducted from the settlement. [See E1 to E5].
 
-- queryListing
-Requires index number, returns a listing address. All listing addresses are stored on the controller after each deployment.
+- queryByIndex
+Requires index number, returns a listing address. All listing addresses and their listed NFT addresses are stored on the controller after each deployment.
 
-- bail (ownerOnly)
-Transfers all NFT liquidity from a target listing address to the caller.
-
+- queryByAddress 
+Returns the index numbers of listing slots that have a specific NFT address or listing address. 
 
  
 /// Listing Contracts /// 
@@ -129,7 +128,7 @@ String data containing the name of the NFT collection in question, formatted as 
 Each NFT once listed is given an associated "Cold Token" deployment, Cold Tokens are standard ERC-20 FFTs that can be swapped at a preset ratio for the listed NFT using 'marketBuy' and 'marketSell'.
 The ratio is set by the deployer as a unit256 number, this indicates how much of the cold token can be swapped for 1 NFT.  
 The tokens have 18 decimals by default. 
-When issuing a cold token the deployer sets the supply. 
+When issuing a cold token the deployer sets the supply - name and ticker. 
 
 /// Examples /// 
 E1 : Maker places a marketBuy order to buy 10 NFTs with 10 Cold Tokens, 0.005% of the order is; 0.005, thus their actual order is charged 10.005 Cold tokens and they receive their 10 NFT settlement. The 0.005 Cold tokens are sent to the collector while the 10 cost is added to the liquidity balance of the listing contract.  
@@ -148,3 +147,5 @@ E4 : Maker places an askSell order to sell item #102 of an NFT collection in exc
 - No Constructor Arguments.
 
 - No Preset data like contract addresses. 
+
+- No bail functions. 
