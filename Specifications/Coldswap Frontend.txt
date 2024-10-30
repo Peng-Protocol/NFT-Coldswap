@@ -1,0 +1,134 @@
+/// Premise /// 
+A frontend application for interacting with Coldswap contracts. 
+
+/// Page 1 : Landing  ///
+ 
+1a : Connect Wallet Button; 
+When clicked, triggers the app to request a connection with a valid web3 wallet on the device, (does not redirect if the device has no wallet, simply fails), (cannot be updated, all required wallet connect files are stored on the app), (does not automatically connect, must be clicked).   
+
+1b : Logo; 
+DXH Logo.
+
+1c : Search/Control Panel; 
+Lets the user automatically search for an NFT's Coldswap Listing based on its contract address. Alternatively lets the user specify a listing address to interact with. 
+
+1d : Address Bar
+
+1e : Search Button; 
+Initiates interaction, begins by querying the controller address' read function "queryByAddress" then "queryByIndex", caching all listings with the specified token contract. 
+Presents all listings as clickable links, each link takes the user to page 2 but with the selected listing inserted for interaction. 
+
+If the specified address is a listing address then the frontend takes the user to page 2 with the stated listing for interaction.  
+
+1f : Scan Button
+Opens an NFTscan link with the stated NFT address. 
+
+1g : Help Button; 
+Creates a popup that says "NFT ColdSwap is a system for fractionalizing NFTs into fungible tokens and swapping between various fungible token pairs. Use the search function to look up various listings. If you already have a specific listing you want to interact with; specify the address in the address field".  
+
+1h : GitHub Link, Telegram Link, Cold Factory link, Hot Factories link ;
+"Hot Factories" Link, opens 2 urls for the new and old Hotswap Factory. 
+
+
+/// Page 2 ///
+
+2a : Cold Fraction Menu 
+
+2b : Listing Name;
+Displays the name stored on the listing contract. Name cannot be longer than panel. 
+
+2c : Amount Field
+
+2d : Type Toggle 
+Determines if the user is converting an NFT for its fractions or fractions for whole NFT items. 
+
+2e : Execute Button; 
+Executes a 'marketBuy' or 'marketSell' transaction with the amount specified based on the order type. 
+
+
+2f : Cold Bid Menu 
+
+2g : Item Number field; 
+Allows the user to set which NFT item to buy or sell. 
+
+For sells this first queries the user's balance for the stated NFT item, if they don't have the NFT item then throw error; "NFT item not found". 
+
+2h : Amount; 
+Allows the user to set how much [NATIVE] they are expecting to buy with or sell for. 
+
+2i : Order Type; 
+Determines if they are buying or selling the specified item in 2g. 
+
+2j : Execute Button; 
+Executes a 'bidBuy' or 'Ask'sell' transaction with the amount specified based on the details in 2-2g to 2-2i. 
+
+Produces an NFTscan link of the transaction. 
+ 
+2k : List button;
+Presents page 3.  
+
+2l : Liquidity button; 
+Presents page 4 with the listing's NFT set for interaction. 
+
+2m : Exit Button; 
+Closes the menu, returns to page 1. 
+
+2n : Active Bids/Asks; 
+Fetches and presents the data of all existing orders on the listing contract. Each bid/ask only stores token details, no metadata. Each bid can be optionally expanded to view the image and metadata. Metadata and images are cached locally.  
+
+2o : Accept Button;  
+Pushes a transaction for 'takeBid' or 'takeAsk' depending on the order type. 
+
+2p : Cancel Button; 
+Pushes a transaction to cancel an owned order slot. 
+
+2q : Scroll Wheel;
+Is a scroll wheel. 
+
+
+/// Page 3 : Listing Menu ///
+3a ; Cold Listing menu
+
+3b ; NFT Address 
+
+3c ; List Button;
+Pushes a transaction for a Coldswap listing using the stated NFT address. 
+
+Produces a Polygonscan link of the transaction. 
+
+3d ; Exit Button;
+Closes Page 3, returns to Page 1.
+
+/// Page 4 : QuickSwap LP ///
+(Images not included) 
+4a ; NFT Ticker; 
+Displays the cold token ticker. 
+
+4b ; Amount Field (Cold); 
+A field for determining how much of the fractional NFT they are depositing. 
+
+4c ; FFT Ticker / address field; 
+Is a field when no QuickSwap listed FFT is inserted. When an FFT address is inserted the frontend searches for any available pools [See : "Links"]. 
+If no pools are available the frontend continues with the assumption the user wants to create a new pool. 
+Queries and displays the token ticker. 
+
+4d ; Amount Field (Cold); 
+Allows the user to specify how much fractional NFT they are depositing. Acquires the token decimals and normalizes the input. 
+
+4e; Amount Field (FFT);
+Allows the user to specify how much FFT they are depositing. Gets the LP's ratio if an LP already exists, tokens to deposit must match the existing ratio. Acquires the token decimals and normalizes the input. 
+
+4f ; Deposit Button
+Pushes a transaction to either add Liquidity to an existing pool that the frontend has already queried or create a new pool with the amounts specified. 
+
+
+/// Links ///
+Use the following links to integrate QuickSwap LPs (same as Uniswap). 
+
+https://github.com/thanpolas/uniswap-chain-queries 
+
+https://github.com/Aboudoc/Uniswap-v2
+
+
+/// Notes /// 
+- Querying all listing and controller addresses could take a while if there are many.  
