@@ -1,0 +1,122 @@
+/// Premise ///
+A simple router between NFT Hotswap LPs and QuickSwap router. 
+
+/// Contracts ///
+The system consists of one contract; the router. 
+
+/// Router v1 /// 
+The router executes transactions to buy or sell a token on Quickswap and NFT Hotswap sequentially. 
+
+! Functions ! 
+- sellHot; 
+Executes a transaction to sell an NFT on NFT Hotswap for its listed FFT (float enabled fungible token), then within the same transaction swaps the listed FFT for a target token on quickswap or for [NATIVE]. 
+
+NFT(hotswap) >> FFT(hotswap) >> FFT/NATIVE(QuickSwap). 
+
+Required fields; startAmount (NFT), startController, FFTPair, endToken, slippage, and "path".
+
+"startAmount" represents how many NFT items a user is putting in. 
+
+"startController" defines where to call 'swapNFT' in order to sell the intended NFT. 
+
+"FFTPair" defines the FFT paired to the NFT and is required for going; FFTPair >> FFT/NATIVE(QuickSwap).
+
+"endToken" defines what kind of swap to execute on QuickSwap and what token address to specify for purchase. 
+Specifying "0x00" initiates a [NATIVE] swap
+
+"slippage" percent is required to estimate minimum output and maximum input based on the current price of the token (on QuickSwap). 
+
+The "path" data is provided by the frontend via the caller. This is used by QuickSwap to determine what LPs to go through before arriving at a destination token. 
+
+Route functions will use "swapExactTokenForETH" if the endToken is [NATIVE].
+
+Will use "swapExactTokenForToken" if the endToken is an FFT. 
+  
+- buyHot; 
+Executes a transaction to convert a user's FFT or [NATIVE] on QuickSwap for a target FFT listed on NFT Hotswap, then within the same transaction swaps the listed FFT for the target NFT. 
+
+FFT(QuickSwap) >> FFT(hotswap) >> NFT(hotswap).
+
+Required fields; startAmount, startToken,  FFTPair, endController, path and slippage. 
+
+"startAmount" is a user defined figure, and represents how much FFT they are putting in. 
+
+"startToken" defines what kind of swap to execute on QuickSwap and what token address to specify for sale. (Needs to estimate minimum output and maximum input based on the current price of the token and stated "slippage" percent. Specifying "0x00" initiates a [NATIVE] swap). 
+
+"endController" defines where to call 'swapFFT' in order to buy the intended NFT.  
+
+All remaining FFT that could not buy a whole NFT are returned to the caller.
+
+Routes will use will use "swapExactETHForToken" if the startToken is [NATIVE]. 
+
+Routes will use will use "swapExactTokenForToken" if the startToken is an FFT. 
+
+- swapQuick 
+Initiates a regular QuickSwap swap between (2) stated tokens or [NATIVE]. 
+
+Required fields : startAmount, startToken, endToken, path and slippage. 
+
+- megaHotSell
+Similar to "sellHot" but sells a stated NFT via a stated controller then uses the acquired FFT to buy another NFT on Hotswap that has the same FFT as a pair. 
+
+NFT(Hotswap) >> FFT(Hotswap) >> NFT(Hotswap) 
+
+This function estimates how much of the target NFT can be bought using the user's sold FFT. 
+
+All remaining FFT from the initial sell that could not buy a whole NFT are returned to the caller. 
+
+If the acquired FFT from the initial sell cannot buy even a single NFT then the entire amount is returned to the caller. 
+
+Required fields; startController, endController, slippage, slippage
+
+- gigaHotSell 
+Similar to "megaHotSell" but the 'startController' and 'endController' do not share a similar listed FFT. 
+
+NFT(Hotswap) >> FFT(Hotswap) >> FFT(QuickSwap) >> NFT(Hotswap) 
+
+- setQuickSwap (ownerOnly)
+Determines the QuickSwap router where swap functions are called. 
+
+! Data ! 
+- quickSwap 
+Stores the quickSwap router address.
+
+/// Router v2 /// 
+Adds functions for three-way swaps with Coldswap fractionalized tokens. Only useable once Coldswap is live. All prior v1 functions are retained. 
+
+! Added Functions !
+- freezeAndSwap; 
+Executes a transaction to convert a listed NFT for its Cold token, then swaps the cold token on QuickSwap for a target token. 
+
+NFT(hotswap) >> Cold-Token(coldswap) >> FFT(QuickSwap)
+
+! Required Fields !
+
+startController, coldListing, endToken, slippage
+
+"coldListing" defines the coldswap listing address where 'marketBuy' is called. 
+
+- swapAndFreeze; 
+Executes a transaction to swap a target token on QuickSwap for a Cold Token, then converts the Cold Token for a listed NFT. 
+
+FFT(QuickSwap) >> Cold-Token(coldswap) >> NFT(hotswap) 
+
+! Required Fields ! 
+
+startToken, coldListing, endController 
+
+/// Links ///
+QuickSwap Router needs "paths" which help it determine what LPs to go through in order to arrive at a destination token, use the following links to assist in routing; 
+
+https://github.com/Uniswap/smart-order-router
+
+https://github.com/thanpolas/uniswap-chain-queries 
+
+https://ethereum.stackexchange.com/questions/143697/what-is-the-quote-function-in-uniswapv2library-used-for
+
+/// Notes ///
+- No preset data
+
+- No constructor arguments
+
+- Reuse slippage calculations from Hotswap frontend. 
