@@ -16,7 +16,7 @@ Determines the address of the protocol fee collector, the deployer is set here b
 
 - queryByAddress 
 All deployed NFT/FFT LPs are stored by index and can be queried.  This function returns all index numbers that store a particular NFT or FFT or controller address, 
-Requires "step", each step returns up to 100 index numbers, 
+Requires "step", each step returns up to 1000 index numbers, 
 
 - queryByIndex 
 Returns the NFT/FFT addresses and controller address for a given controller stored by index number,
@@ -184,9 +184,11 @@ Returns the full details of a liquidity slot by its index number,
 
 - queryLiquidByOwner 
 Returns the index numbers of liquidity slots an address owns, 
+Requires "step", each step returns up to 1000 index numbers, 
 
 - querySynthByAddress 
 Returns the index numbers of all Synths an address owns,
+Requires "step", each step returns up to 1000 index numbers,
 
 - querySynthByIndex 
 Returns the owner address of a synth item by its index number, 
