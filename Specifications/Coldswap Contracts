@@ -1,5 +1,5 @@
 /// Premise /// 
-An NFT fractionalization system that allows trading an NFT collection for an equivalent FFT created by the exchange. Additionally allows individual sale or purchase of NFT items at bid/ask prices using [NATIVE]. 
+An NFT fractionalization system that allows trading an NFT collection for an equivalent FFT created by the exchange. Additionally allows individual sale or purchase of NFT items at bid/ask prices using [NATIVE] or custom FFTs. 
 
 /// Contracts ///
 The system is split into (3) contracts; the Coldswap controller, Cold Tokens and listing contracts.
@@ -12,22 +12,32 @@ The Coldswap controller is responsible for creating new listing contracts and ex
 Creates a new Listing Contract, creates a cold token and writes the cold token address in the "Cold Address" field of the listing. 
 
 - marketBuy
-Swaps an exact number of cold tokens for the same number in the listing's NFTs. 
+Swaps an exact number of cold tokens for the set ratio in the listing's NFTs. 
 
 - marketSell 
-Same as marketBuy but swaps NFT items for the same number in cold Tokens. 
+Same as marketBuy but swaps NFT items for the set ratio in cold Tokens. 
 
 - bidBuy
-Creates a new order slot with the order details, moves the user's [NATIVE] amount into the listing contract pending settlement in a specific NFT item at the bid price. 
+Creates a new order slot with the order details, requires a stated FFT to trade with. 
+Moves the user's [NATIVE] or FFT amount into the listing contract pending settlement in a specific NFT item at the bid price. 
+Stating "0" in the FFT address field indicates the order is for [NATIVE].
+
+The "Bid price" is how much the buyer has put up in [NATIVE] or FFT that they expect to give for the stated NFT item. 
 
 - askSell
-Similar to 'bidBuy' but moves the NFT item from the user into the listing contract pending settlement in [NATIVE] at the ask price.
+Similar to 'bidBuy' but moves the NFT item from the user into the listing contract pending settlement in [NATIVE] or stated FFT at the ask price.
+
+The "ask price" is how much [NATIVE] or FFT the seller is expecting for the stated NFT item. 
 
 - takeBid
-Transfers the requested NFT item for a 'bidBuy' order slot to the caller from the listing contract, while transferring the required [NATIVE] amount set in the order to the maker's address. Clears the order slot, requires slot index number. 
+Transfers the stored [NATIVE] or FFT amount from a 'bidBuy' order slot to the caller while deducting the requested NFT item from the caller to the original bidder's address.
+Fails if the caller does not have the requested NFT item. 
+Clears the order slot, requires slot index number. 
 
 - takeAsk
-Transfers the requested amount from a 'bidBuy' order slot in NATIVE from the caller to the order maker while transferring the listed NFT to the taker's address.
+Transfers the NFT item for an 'askSell' order slot to the caller, while transferring the required [NATIVE] or FFT amount to the maker's address. 
+Fails if the caller does not have sufficient [NATIVE] or FFT units.
+Clears the order slot, requires slot index number. 
 
 - cancelOrder
 Clears the details of a target order slot the caller owns and returns their principal.
@@ -36,19 +46,21 @@ Clears the details of a target order slot the caller owns and returns their prin
 Sets the collector address.
 
 - collector
-Each 'marketBuy' and 'bidBuy', takes a 0.05% fee from the maker which is added to their cost, while each 'marketSell' and 'askSell' takes a 0.05% fee from the taker which is deducted from the settlement. [See E1 to E5].
+Each 'marketBuy' and 'bidBuy' takes a 0.05% fee from the maker which is added to their cost, while each 'marketSell' and 'askSell' takes a 0.05% fee from the taker which is deducted from the settlement. [See E1 to E4].
 
 - queryByIndex
 Requires index number, returns a listing address. All listing addresses and their listed NFT addresses are stored on the controller after each deployment.
 
 - queryByAddress 
-Returns the index numbers of listing slots that have a specific NFT address or listing address. 
+Returns up to (1000) index numbers of listing slots that have a specific NFT address or listing address. 
+Requires higher "step" to return additional (1000) indexes.
 
  
 /// Listing Contracts /// 
 Holds the listing details of the NFT and Cold Token, allowing them to be traded. 
 A listing contract holds the following details; 
 
+- Name (string)
 - NFT Address (Address) 
 - Cold Address (Address) 
 - Items Range Start (uint256)
@@ -56,6 +68,8 @@ A listing contract holds the following details;
 - Cold Balance (uint256)
 - NFT Balance (uint256)
 - decimals (uint256)
+
+"Name" is the NFT name and ticker symbol. 
 
 "Items Range Start" is a field required for listing, the range defines which NFT items in the collection can be traded under the listing contract.  Range Start is the first ID in the collection approved for trading. 
 
@@ -73,14 +87,19 @@ Details include;
 - recipient (address)
 - item number (uint256)
 - pending or principal (uint256) 
+- FFT Address (address)
 - listing (address) 
 - order type (bool)
 - index (uint256)
 - deadline (uint256)
 
+"recipient" is an optional field that restricts who can accept the order. 
+
 "Item number" is the ID of the NFT currently being traded, is needed for settlement or reversion. 
 
 "pending or principal" stores how much [NATIVE] the maker has put up or is expecting, this depends on the order type. 
+
+"FFT Address" stores which FFT the user expects to get or is putting up. 
 
 "Listing" repeats the listing address. 
 
@@ -88,11 +107,14 @@ Details include;
 
 "index" stores the order number, is needed for reversion or identification. 
 
-"deadline" stores a duration up to 7 days after which the order can be cancelled by "clearTokenOrders". 
+"deadline" stores a duration after which the order can be cancelled by "clearTokenOrders". 
 
 ! functions ! 
 - clearOrder
-Requires an index number, returns the [NATIVE] or NFT amount from a bidBuy or askSell on an owned order slot while clearing the order slot. 
+Requires an index number, returns the [NATIVE] - FFT or NFT amount from a bidBuy or askSell on an owned order slot while clearing the order slot. 
+
+- clearAllOrders
+Clears up to 100 orders made by the caller and returns the [NATIVE] - FFT or NFT amount on owned order slots while clearing the order slots. 
 
 - clearTokenOrders 
 Clears up to 100 orders currently pending in the contract if their deadline has been reached. 
@@ -125,17 +147,17 @@ Returns the address of the controller that created the listing.
 String data containing the name of the NFT collection in question, formatted as "Fractional [NAME]", 
                                                   
 /// Cold Tokens ///
-Each NFT once listed is given an associated "Cold Token" deployment, Cold Tokens are standard ERC-20 FFTs that can be swapped at a preset ratio for the listed NFT using 'marketBuy' and 'marketSell'.
+Each NFT once listed is given an associated "Cold Token" deployment, Cold Tokens are standard ERC-20 FFTs that can be swapped at a set ratio for the listed NFT using 'marketBuy' and 'marketSell'.
 The ratio is set by the deployer as a unit256 number, this indicates how much of the cold token can be swapped for 1 NFT.  
 The tokens have 18 decimals by default. 
 When issuing a cold token the deployer sets the supply - name and ticker. 
 
 /// Examples /// 
-E1 : Maker places a marketBuy order to buy 10 NFTs with 10 Cold Tokens, 0.005% of the order is; 0.005, thus their actual order is charged 10.005 Cold tokens and they receive their 10 NFT settlement. The 0.005 Cold tokens are sent to the collector while the 10 cost is added to the liquidity balance of the listing contract.  
+E1 : Maker places a marketBuy order to buy 10 NFTs with 10 Cold Tokens, 0.05% of the order is; 0.005, thus their actual order is charged 10.005 Cold tokens and they receive their 10 NFT settlement. The 0.005 Cold tokens are sent to the collector while the 10 cost is added to the liquidity balance of the listing contract.  
 
 E2 : Conversely if they placed a marketSell order for 10 NFTs, in exchange they would receive 9.995 Cold tokens, while 0.005 would be sent from the listing contract to the collector. 
 
-E3 : Maker places a bidBuy order to buy item #102 of an NFT collection in exchange for 100 [NATIVE], when a taker accepts the order the taker receives 99.95 [NATIVE] from the maker's principal stored in the listing contract, while the collector receives 0.05 and the maker gets the NFT item.  
+E3 : Maker places a bidBuy order to buy item #102 of an NFT collection in exchange for 100 [NATIVE], when a taker accepts the order; the taker receives 99.95 [NATIVE] from the maker's principal stored in the listing contract, while the collector receives 0.05, and the maker gets the NFT item.  
 
 E4 : Maker places an askSell order to sell item #102 of an NFT collection in exchange for 100 [NATIVE], when a taker accepts the order the maker receives 99.95 [NATIVE] from the taker while the collector receives 0.05 and the taker gets the NFT. 
 
