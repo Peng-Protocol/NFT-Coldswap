@@ -13,12 +13,13 @@ DXH Logo.
 Lets the user automatically search for an NFT - FFT or Controller. 
 
 1d : Address Bar
-If a controller is set here, then no additional querying occurs and 1e goes directly to page 2 with the controllers address set. 
+If a controller is set here, then no additional querying occurs and 1e goes directly to page-2 with the controllers address set. 
 
 1e-1 : Search Button; 
 Initiates search, queries the factory addresses' read function "queryByAddress", and then "queryByIndex", then looking up "controllerName" in the returned controller address. 
 
-Displays in a pop-up all Controllers with a given NFT or FFT. Displaying the controllers' names which are clickable links. These links direct to Page 2 - 3 with the controller address set. 
+- Search Results 
+Displays up to (1000) Controllers with a given NFT or FFT. Displaying the controllers' names which are clickable links. These links direct to Page 2 - 3 with the controller address set. 
 
 Each returned Controller displays the FFT Liquidity amount, requires querying Liquidity on the controller. 
 
@@ -26,20 +27,20 @@ Also displays an entry with only an FFT's Ticker if an FFT address is inserted i
 
 If an FFT or NFT is not listed then it cannot be traded in any capacity, returns error message "Token not listed". 
 
-If returned controllers from querying the factory exceed 99 see 1e-2
+If returned controllers from querying the factory exceed (999) see 1e-2
 
 Putting "0" in this section prepares a swap for [NATIVE] in page 2.
 
-Putting "1" returns a list of all listed controllers, querying the factory incrementally from 1 to 100 or until an index returns no data, 1e-2 applies here.  
+Putting "1" returns a list of all listed controllers, querying the factory incrementally from 1 to 1000 or until an index returns no data, 1e-2 applies here.  
 
 1e-2 : More Button ; 
 A button that says "more" which causes the frontend to perform the same query done in 1e-1 but with a higher "step". 
 
 1f : List Button ;
-Sends the user to Page 3 with no address set. 
+Sends the user to Page-3 with no address set. 
 
 1g : Help Button; 
-Presents a popup that reads "NFT Hotswap is a system for instantly converting NFTs for fungible tokens and vice versa, use this search bar to look up various token contracts. Type "0" to interact using the native token (MATIC), or "1" to get a list of all listed tokens". 
+Presents a pop-up that reads "NFT Hotswap is a system for instantly converting NFTs for fungible tokens and vice versa, use this search bar to look up various token contracts. Type "0" to interact using the native token (MATIC), or "1" to get a list of all listed tokens". 
 
 1g : GitHub Link, Telegram Link, Cold Factory link, Hot Factories link ;
 "Hot Factories Link" opens 2 urls for the 2 Hotswap Factories. 
@@ -59,7 +60,7 @@ If the stated token in 1c is an FFT then this displays the FFT Ticker instead an
 This displays the price for the NFT set in 1c, displays the price as "# [FFT Ticker]" e.g "2.6 WMATIC" 
 Queries "Price" - "decimals" and "name" on the set controller and picks the FFT part of the name. Normalizes price to decimals. 
 
-If the stated token in 1c is an FFT or [NATIVE] then this uses "Uniswap Chain Queries" [See : "Links"] to find LP addresses with [FFT] and [NATIVE], returns the token's price in [NATIVE] or [NATIVE] itself and displays it in this area. 
+If the stated token in 1c is an FFT or [NATIVE] then this uses "Uniswap Chain Queries" [See : "Links"] to find LP addresses with [FFT] and [NATIVE], returns the token's price in wrapped [NATIVE] or [NATIVE] itself and displays it in this area. 
 
 For any token with price in [NATIVE] or wrapped [NATIVE], the frontend queries a Chainlink data feed for [NATIVE] / USD and presents a USD price. 
 
@@ -179,7 +180,7 @@ FFT output - delta =  minOutput
 
 "slippage" is the number set in the slippage field on 2k.
 
-This uses 'swapFFT' or 'swapNFT' respectively unless stated otherwise in 2e, I which case 'redeemNFT' or 'redeemFTT' are used. 
+This uses 'swapFFT' or 'swapNFT' respectively unless stated otherwise in 2e, in which case 'redeemNFT' or 'redeemFTT' are used. 
 
 For swaps that involve QuickSwap, consult "Hotswap Routers.txt". Consider "Uniswap Chain Queries" and "Smart Order Router" to get 'Path' [See : "Links"].
 
