@@ -104,16 +104,23 @@ Is a scroll wheel.
 
 3b ; NFT Address 
 
-3c ; List Button;
-Pushes a transaction for a Coldswap listing using the stated NFT address. 
+3c ; Cold Token Name 
+
+3d ; Cold Token Ticker 
+
+3e ; Ratio (Cold token units per NFT, default is "1000000"). 
+
+3f ; List Button;
+Pushes a transaction for a Coldswap listing using the stated details. 
 
 Produces a Polygonscan link of the transaction. 
 
-3d ; Exit Button;
+3g ; Exit Button;
 Closes Page-3, returns to Page-1.
 
-3e ; LP Button 
+3h ; LP Button 
 Takes the user to page-4 with the newly listed NFT set for interaction. Only appears when an NFT is newly listed. 
+
 
 /// Page 4 : QuickSwap LP ///
 (Images not included) 
