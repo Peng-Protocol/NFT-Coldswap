@@ -15,8 +15,8 @@ Creates a new v2 controller with the user's stated details. Requires NFT and FFT
 Determines the address of the protocol fee collector, the deployer is set here by default but can be changed,
 
 - queryByAddress 
-All deployed NFT/FFT LPs are stored by index and can be queried.  This function returns all index numbers that store a particular NFT or FFT or controller address, 
-Requires "step", each step returns up to 1000 index numbers, 
+All deployed NFT/FFT LPs are stored by index and can be queried.  This function returns alup to (1000) index numbers that store a particular NFT or FFT or controller address, 
+Requires "step" to return additional (1000) index numbers, 
 
 - queryByIndex 
 Returns the NFT/FFT addresses and controller address for a given controller stored by index number,
@@ -43,7 +43,7 @@ Initiates a transfer of FFT units from the caller in exchange for a stated numbe
 
 NFT swap amount * price = FFT input 
 FFT Liquidity + FFT input = FFT impact 
-synthsHeld - NFT swap amount = NFT impact 
+(synthsHeld + heldNFTs) - NFT swap amount = NFT impact 
 FFT impact / NFT impact = impact price 
 
 The "impact price" is the price at which the user is settled,
@@ -82,7 +82,7 @@ Each sell uses "impact price", this is calculated as follows;
 
 NFT swap amount * price = FFT output 
 FFT Liquidity - FFT output = FFT impact 
-synthsHeld  + NFT swap amount = NFT impact 
+(synthsHeld + heldNFTs)  + NFT swap amount = NFT impact 
 FFT impact / NFT impact = impact price 
 
 The "impact price" is the price at which the user is settled,
@@ -106,7 +106,7 @@ Uses "maxInput",
 
 calls "updatePrice",
 
-Uses impact price but has no "real" effect on price,
+Uses impact price. 
 
 Has fees,
 
@@ -118,8 +118,6 @@ Uses "impact price",
 Uses "minOutput",
 
 Updates "heldNFTs",
-
-Uses impact price but has no "real" effect on price,
 
 Has fees, 
 
@@ -171,24 +169,29 @@ FFT Alloc  / Total FFT Liquidity = Liquidity contribution
 
 fees accrued * liquidity contribution = output amount
 
+Updates dVolume to current tVolume, fees can be claimed again. 
+
+If a user does not claim before withdrawing, then their fees are forfeit,
+
+
 - transferLiquidity 
 Changes the "depositor" of a liquidity slot to a stated address, can only be called by the current depositor, requires index number, 
 
 - updatePrice 
 Each v2 controller is created with a stated number of synth items, price is calculated as;
 
-liquidity / synthsHeld = price
+liquidity / (synthsHeld + heldNFTs) = price
 
 - queryLiquidByIndex 
 Returns the full details of a liquidity slot by its index number, 
 
 - queryLiquidByOwner 
 Returns the index numbers of liquidity slots an address owns, 
-Requires "step", each step returns up to 1000 index numbers, 
+Requires "step", each step returns up to (1000) index numbers, 
 
 - querySynthByAddress 
 Returns the index numbers of all Synths an address owns,
-Requires "step", each step returns up to 1000 index numbers,
+Requires "step", each step returns up to (1000) index numbers,
 
 - querySynthByIndex 
 Returns the owner address of a synth item by its index number, 
@@ -228,7 +231,7 @@ Stores the total number of synth items in existence,
 Stores the Synth token's "name", which is the original token's name plus "(Hotswap)",
 
 - synthTicker 
-Stores the Synth token's "symbol", which is the original token's symbol, 
+Stores the Synth token's "symbol", which is the original token's symbol plus "-HS", 
 
 - controllerName
 Stores the symbols of the NFT and FFT collections, is set during deployment. 
@@ -241,7 +244,6 @@ depositor : (address)
 FFT Ratio : (uint256)
 dVolume : (unit256)
 yAllocation : (uint256)
-claimed : (bool)
 index : (uint256)
 
 "FFT Ratio" stores how much of the pool's FFT balance the depositor is entitled to,
@@ -249,9 +251,6 @@ index : (uint256)
 "dVolume" stores the tVolume value at the time the deposit was made and is necessary for claiming fees,
 
 "Allocations" show how much was originally deposited by the address, this is necessary for calculating how much they are owed once they attempt to withdraw,
-
-The "claimed" field is used to indicate if a user has claimed their fees or not, once set to "true" they can no longer claim, they can only withdraw their liquidity,
-If a user does not claim before withdrawing, then their fees are forfeit,
 
 Additional liquidity data stored by the controller are; 
 
