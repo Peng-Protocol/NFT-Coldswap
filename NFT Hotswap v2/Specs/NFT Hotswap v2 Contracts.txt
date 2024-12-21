@@ -129,6 +129,12 @@ Has no effect on price,
 
 Does not have fees, 
 
+- transferSynth
+Transfers a specified synth item to a target address, can multisend by distinguishing each sent item with a ",". 
+
+- transferSynthFrom 
+Allows an external contract to execute a transfer of Synths from one stated address to another. 
+
 - deposit
 Allows the user to deposit FFT units and receive a Liquidity slot entry [See : "Liquidity Slots"] 
 
