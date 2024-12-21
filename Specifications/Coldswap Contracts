@@ -29,10 +29,14 @@ Similar to 'bidBuy' but moves the NFT item from the user into the listing contra
 
 The "ask price" is how much [NATIVE] or FFT the seller is expecting for the stated NFT item. 
 
+This can be executed with synth NFT items from the collection's oldest Hotswap v2 listing. 
+
 - takeBid
 Transfers the stored [NATIVE] or FFT amount from a 'bidBuy' order slot to the caller while deducting the requested NFT item from the caller to the original bidder's address.
 Fails if the caller does not have the requested NFT item. 
 Clears the order slot, requires slot index number. 
+
+This can be settled with synth NFT items from the collection's oldest Hotswap v2 listing. 
 
 - takeAsk
 Transfers the NFT item for an 'askSell' order slot to the caller, while transferring the required [NATIVE] or FFT amount to the maker's address. 
