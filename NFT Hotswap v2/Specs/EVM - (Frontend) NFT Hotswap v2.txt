@@ -89,7 +89,8 @@ Determines if the swap is for buy or sell.
 
 2h : Redemption toggle
 Has a subtle text saying "Redeem",
-Determines if 2m uses "swapFFT" / "swapNFT" or "redeemNFT" / "redeemFFT". 
+Determines if 2m uses "swapFFT" - "swapNFT" or "redeemNFT" - "redeemFFT". 
+Default is based on which balance is higher - "real" NFTs or Synths. 
 
 2i : Real NFTs 
 Displays the number of "Real" NFT items in the controller, queries "heldNFTs" on the controller only after 2d is set. Only applies to Hotswap related swaps. 
@@ -206,6 +207,9 @@ Closes page 2, returns to page 1.
 3a : Hotswap Listing menu
 
 3b : NFT Address 
+
+- Synth Supply 
+Default is "0".
 
 3c : FFT Address 
 
