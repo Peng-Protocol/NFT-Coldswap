@@ -228,12 +228,12 @@ Displays the controller's name, this menu can only be used if the address set in
 4c : Amount field 
 
 4d : Deposit button ; 
-Displays a pop-up for the user to approve the FFT or NFT if enough is not approved for deposit, if already approved then it pushes a transaction for deposit using the details provided. 
+Displays a pop-up for the user to approve the FFT if enough is not approved for deposit, if already approved then it pushes a transaction for deposit using the details provided. 
 
 4e : Positions panel ; 
-Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays as 1.0e5. Shows the token ticker up to 4 letters, more than 4 is displayed as "XXXX...". lastly it displays the amount of fees collected and unclaimed, if claimed this returns "N/A".  
+Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays in scientific notation. Shows the token ticker up to 4 letters, more than 4 is displayed with ellipsis. Lastly displays the amount of fees collected. 
 
-Unclaimed fees are calculated by using the following formula from the hotswap contracts specifications; 
+Unclaimed fees are calculated by using the following formula from the Hotswap Contract specifications; 
 
 tVolume - dVolume = cVolume 
 
