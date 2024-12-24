@@ -155,6 +155,19 @@ Returns the amount of Cold tokens currently in the contract.
 - controller 
 Returns the address of the controller that created the listing. 
 
+- queryDeferralByRank  
+All deferred receivers are stored by rank. Each entry stores a receiver address - token contract address and total amount per token. This function returns the full details of each entry. 
+
+Ranks are updated after every 'takeAsk' transaction, and only updates (50) entries above and below the receiver's rank. Sorting them by total volume done. 
+
+Top rank is "1". 
+
+- queryDeferralByToken 
+Returns up to (1000) deferral rank numbers that store a token address. Requires "step" to return additional (1000). 
+
+- queryDeferralByAddress 
+Returns up to (1000) deferral index numbers for a receiver address. Requires "step" to return additional (1000). 
+
 - Name 
 String data containing the name of the NFT collection in question, formatted as "Fractional [NAME]", 
                                                   
