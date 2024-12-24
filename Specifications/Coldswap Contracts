@@ -96,6 +96,8 @@ Details include;
 - order type (bool)
 - index (uint256)
 - deadline (uint256)
+- defer (bool) 
+- defer to (address)
 
 "recipient" is an optional field that restricts who can accept the order. 
 
@@ -113,15 +115,21 @@ Details include;
 
 "deadline" stores a duration after which the order can be cancelled by "clearTokenOrders". 
 
+"defer to" is used on 'askSell' orders and determines if the order will defer a portion of the received amount. 
+
+"defer percent" determines what percent of the received amount is deferred. 
+
+"defer address" determines where the deferred amount is sent. 
+
 ! functions ! 
 - clearOrder
 Requires an index number, returns the [NATIVE] - FFT or NFT amount from a bidBuy or askSell on an owned order slot while clearing the order slot. 
 
 - clearAllOrders
-Clears up to 100 orders made by the caller and returns the [NATIVE] - FFT or NFT amount on owned order slots while clearing the order slots. 
+Clears up to (100) orders made by the caller and returns the [NATIVE] - FFT or NFT amount on owned order slots while clearing the order slots. 
 
 - clearTokenOrders 
-Clears up to 100 orders currently pending in the contract if their deadline has been reached. 
+Clears up to (100) orders currently pending in the contract if their deadline has been reached. Is triggered by bid - ask or market functions. 
 
 - withdraw (owner only) 
 Used to move units of NFT or FFT from the listing contract, used by the controller. (Can be slit into 2 functions). 
